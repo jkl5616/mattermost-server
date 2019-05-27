@@ -1384,6 +1384,14 @@ func (a *App) GetChannelUnread(channelId, userId string) (*model.ChannelUnread, 
 	return channelUnread, nil
 }
 
+func (a *App) GetChannelPinnedPostCount(channelId string) (int64, *model.AppError) {
+	result := <-a.Srv.Store.Channel().GetPinnedPostCount(channelId, true)
+	if result.Err != nil {
+		return 0, result.Err
+	}
+	return result.Data.(int64), nil
+}
+
 func (a *App) JoinChannel(channel *model.Channel, userId string) *model.AppError {
 	userChan := make(chan store.StoreResult, 1)
 	memberChan := make(chan store.StoreResult, 1)

@@ -669,6 +669,22 @@ func (_m *ChannelStore) GetMoreChannels(teamId string, userId string, offset int
 	return r0
 }
 
+// GetPinnedPostCount provides a mock function with given fields: channelId, allowFromCache
+func (_m *ChannelStore) GetPinnedPostCount(channelId string, allowFromCache bool) store.StoreChannel {
+	ret := _m.Called(channelId, allowFromCache)
+
+	var r0 store.StoreChannel
+	if rf, ok := ret.Get(0).(func(string, bool) store.StoreChannel); ok {
+		r0 = rf(channelId, allowFromCache)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(store.StoreChannel)
+		}
+	}
+
+	return r0
+}
+
 // GetPinnedPosts provides a mock function with given fields: channelId
 func (_m *ChannelStore) GetPinnedPosts(channelId string) store.StoreChannel {
 	ret := _m.Called(channelId)

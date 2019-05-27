@@ -73,6 +73,7 @@ func TestChannelStore(t *testing.T, ss store.Store, s SqlSupplier) {
 	t.Run("GetMembersByIds", func(t *testing.T) { testChannelStoreGetMembersByIds(t, ss) })
 	t.Run("AnalyticsDeletedTypeCount", func(t *testing.T) { testChannelStoreAnalyticsDeletedTypeCount(t, ss) })
 	t.Run("GetPinnedPosts", func(t *testing.T) { testChannelStoreGetPinnedPosts(t, ss) })
+	t.Run("GetPinnedPostCount", func(t *testing.T) { testChannelStoreGetPinnedPostCount(t, ss) })
 	t.Run("MaxChannelsPerTeam", func(t *testing.T) { testChannelStoreMaxChannelsPerTeam(t, ss) })
 	t.Run("GetChannelsByScheme", func(t *testing.T) { testChannelStoreGetChannelsByScheme(t, ss) })
 	t.Run("MigrateChannelMembers", func(t *testing.T) { testChannelStoreMigrateChannelMembers(t, ss) })
@@ -2740,6 +2741,10 @@ func testChannelStoreGetPinnedPosts(t *testing.T, ss store.Store) {
 	} else if len(r2.Data.(*model.PostList).Posts) != 0 {
 		t.Fatal("wasn't supposed to return posts")
 	}
+}
+
+func testChannelStoreGetPinnedPostCount(t *testing.T, ss store.Store) {
+	// TODO: implement test code
 }
 
 func testChannelStoreMaxChannelsPerTeam(t *testing.T, ss store.Store) {

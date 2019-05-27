@@ -278,6 +278,7 @@ type publicChannel struct {
 }
 
 var channelMemberCountsCache = utils.NewLru(CHANNEL_MEMBERS_COUNTS_CACHE_SIZE)
+var channelPinnedPostCountsCache = utils.NewLru(CHANNEL_MEMBERS_COUNTS_CACHE_SIZE)
 var allChannelMembersForUserCache = utils.NewLru(ALL_CHANNEL_MEMBERS_FOR_USER_CACHE_SIZE)
 var allChannelMembersNotifyPropsForChannelCache = utils.NewLru(ALL_CHANNEL_MEMBERS_NOTIFY_PROPS_FOR_CHANNEL_CACHE_SIZE)
 var channelCache = utils.NewLru(model.CHANNEL_CACHE_SIZE)
@@ -722,6 +723,43 @@ func (s SqlChannelStore) GetPinnedPosts(channelId string) store.StoreChannel {
 		}
 
 		result.Data = pl
+	})
+}
+
+func (s SqlChannelStore) GetPinnedPostCount(channelId string, allowFromCache bool) store.StoreChannel {
+	return store.Do(func(result *store.StoreResult) {
+		if allowFromCache {
+			if cacheItem, ok := channelPinnedPostCountsCache.Get(channelId); ok {
+				if s.metrics != nil {
+					s.metrics.IncrementMemCacheHitCounter("Channel PinnedPost Counts")
+				}
+				result.Data = cacheItem.(int64)
+				return
+			}
+		}
+
+		if s.metrics != nil {
+			s.metrics.IncrementMemCacheMissCounter("Channel PinnedPost Counts")
+		}
+
+		count, err := s.GetReplica().SelectInt(`
+			SELECT
+				count(*)
+			FROM
+				Posts
+			WHERE
+				IsPinned = true
+				AND ChannelId = :ChannelId
+				AND DeleteAt = 0`, map[string]interface{}{"ChannelId": channelId})
+		if err != nil {
+			result.Err = model.NewAppError("SqlChannelStore.GetPinnedPostCount", "store.sql_channel.get_pinnedpost_count.app_error", nil, "channel_id="+channelId+", "+err.Error(), http.StatusInternalServerError)
+			return
+		}
+		result.Data = count
+
+		if allowFromCache {
+			channelPinnedPostCountsCache.AddWithExpiresInSecs(channelId, count, CHANNEL_MEMBERS_COUNTS_CACHE_SEC)
+		}
 	})
 }
 
